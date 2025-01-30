@@ -12,8 +12,9 @@ class LGDAPI:
     _user_agent = f'Legendary/{__version__} ({system()})'
     _api_host = 'api.legendary.gl'
 
-    def __init__(self):
+    def __init__(self, proxies={}):
         self.session = requests.session()
+        if proxies: self.session.proxies.update(proxies)
         self.log = logging.getLogger('LGDAPI')
         self.session.headers['User-Agent'] = self._user_agent
 

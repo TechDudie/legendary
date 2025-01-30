@@ -35,11 +35,13 @@ class BindingHTTPAdapter(HTTPAdapter):
 
 class DLWorker(Process):
     def __init__(self, name, queue, out_queue, shm, max_retries=7,
-                 logging_queue=None, dl_timeout=10, bind_addr=None):
+                 logging_queue=None, dl_timeout=10, bind_addr=None,
+                 proxies={}):
         super().__init__(name=name)
         self.q = queue
         self.o_q = out_queue
         self.session = requests.session()
+        if proxies: self.session.proxies.update(proxies)
         self.session.headers.update({
             'User-Agent': 'EpicGamesLauncher/11.0.1-14907503+++Portal+Release-Live Windows/10.0.19041.1.256.64bit'
         })

@@ -22,7 +22,7 @@ from legendary.models.manifest import ManifestComparison, Manifest
 class DLManager(Process):
     def __init__(self, download_dir, base_url, cache_dir=None, status_q=None,
                  max_workers=0, update_interval=1.0, dl_timeout=10, resume_file=None,
-                 max_shared_memory=1024 * 1024 * 1024, bind_ip=None):
+                 max_shared_memory=1024 * 1024 * 1024, bind_ip=None, proxies={}):
         super().__init__(name='DLManager')
         self.log = logging.getLogger('DLM')
         self.proc_debug = False
@@ -42,6 +42,7 @@ class DLManager(Process):
         self.max_workers = max_workers or min(cpu_count() * 2, 16)
         self.dl_timeout = dl_timeout
         self.bind_ips = [] if not bind_ip else bind_ip.split(',')
+        self.proxies=proxies
 
         # Analysis stuff
         self.analysis = None
@@ -666,7 +667,7 @@ class DLManager(Process):
 
             w = DLWorker(f'DLWorker {i + 1}', self.dl_worker_queue, self.dl_result_q,
                          self.shared_memory.name, logging_queue=self.logging_queue,
-                         dl_timeout=self.dl_timeout, bind_addr=bind_ip)
+                         dl_timeout=self.dl_timeout, bind_addr=bind_ip, proxies=self.proxies)
             self.children.append(w)
             w.start()
 

@@ -6,6 +6,7 @@ import csv
 import json
 import logging
 import os
+import re
 import shlex
 import subprocess
 import time
@@ -2648,6 +2649,8 @@ def main():
     parser.add_argument('-A', '--api-timeout', dest='api_timeout', action='store',
                         type=float, default=10, metavar='<seconds>',
                         help='API HTTP request timeout (default: 10 seconds)')
+    parser.add_argument('-p', '--proxy', dest='proxy', action='store', metavar='<proxy>', type=str,
+                        help='Route all requests through a Socks5 proxy server')
 
     # all the commands
     subparsers = parser.add_subparsers(title='Commands', dest='subparser_name', metavar='<command>')
@@ -3041,8 +3044,16 @@ def main():
                 print('Follow https://github.com/derrod/legendary/wiki/Setup-Instructions to set it up properly')
                 subprocess.Popen(['cmd', '/K', 'echo>nul'])
         return
+    
+    # configure proxies
+    proxies = {}
+    if args.proxy:
+        if not re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?$", args.proxy): # basic input sanitization
+            logger.error('Invalid proxy format <IP>:<Port>. Proceeding without proxy...')
+        else:
+            proxies = {'http': f'socks5h://{args.proxy}', 'https': f'socks5h://{args.proxy}', "socks5": f'socks5h://{args.proxy}'}
 
-    cli = LegendaryCLI(override_config=args.config_file, api_timeout=args.api_timeout)
+    cli = LegendaryCLI(override_config=args.config_file, api_timeout=args.api_timeout, proxies=proxies)
     ql = cli.setup_threaded_logging()
 
     config_ll = cli.core.lgd.config.get('Legendary', 'log_level', fallback='info')

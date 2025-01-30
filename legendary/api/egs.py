@@ -34,15 +34,17 @@ class EPCAPI:
     _store_gql_host = 'graphql.epicgames.com'
     _artifact_service_host = 'artifact-public-service-prod.beee.live.use1a.on.epicgames.com'
 
-    def __init__(self, lc='en', cc='US', timeout=10.0):
+    def __init__(self, lc='en', cc='US', timeout=10.0, proxies={}):
         self.log = logging.getLogger('EPCAPI')
 
         self.session = requests.session()
+        if proxies: self.session.proxies.update(proxies)
         self.session.headers['User-Agent'] = self._user_agent
         # increase maximum pool size for multithreaded metadata requests
         self.session.mount('https://', requests.adapters.HTTPAdapter(pool_maxsize=16))
 
         self.unauth_session = requests.session()
+        if proxies: self.unauth_session.proxies.update(proxies)
         self.unauth_session.headers['User-Agent'] = self._user_agent
 
         self._oauth_basic = HTTPBasicAuth(self._user_basic, self._pw_basic)

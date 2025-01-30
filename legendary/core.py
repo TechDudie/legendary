@@ -54,12 +54,14 @@ class LegendaryCore:
     """
     _egl_version = '11.0.1-14907503+++Portal+Release-Live'
 
-    def __init__(self, override_config=None, timeout=10.0):
+    def __init__(self, override_config=None, timeout=10.0, proxies={}):
         self.log = logging.getLogger('Core')
-        self.egs = EPCAPI(timeout=timeout)
+        self.egs = EPCAPI(timeout=timeout, proxies=proxies)
         self.lgd = LGDLFS(config_file=override_config)
         self.egl = EPCLFS()
-        self.lgdapi = LGDAPI()
+        self.lgdapi = LGDAPI(proxies=proxies)
+
+        self.proxies = proxies
 
         # on non-Windows load the programdata path from config
         if os.name != 'nt':
@@ -99,6 +101,7 @@ class LegendaryCore:
         :return: exchange code
         """
         s = session()
+        if self.proxies: s.proxies.update(self.proxies)
         s.headers.update({
             'X-Epic-Event-Action': 'login',
             'X-Epic-Event-Category': 'login',
@@ -1498,7 +1501,7 @@ class LegendaryCore:
 
         dlm = DLManager(install_path, base_url, resume_file=resume_file, status_q=status_q,
                         max_shared_memory=max_shm * 1024 * 1024, max_workers=max_workers,
-                        dl_timeout=dl_timeout, bind_ip=bind_ip)
+                        dl_timeout=dl_timeout, bind_ip=bind_ip, proxies=self.proxies)
         anlres = dlm.run_analysis(manifest=new_manifest, old_manifest=old_manifest,
                                   patch=not disable_patching, resume=not force,
                                   file_prefix_filter=file_prefix_filter,
@@ -2048,7 +2051,7 @@ class LegendaryCore:
         else:
             path = path or os.path.join(self.get_default_install_dir(), '.overlay')
 
-        dlm = DLManager(path, base_urls[0])
+        dlm = DLManager(path, base_urls[0], proxies=self.proxies)
         analysis_result = dlm.run_analysis(manifest=manifest)
 
         install_size = analysis_result.install_size
@@ -2097,7 +2100,7 @@ class LegendaryCore:
         if os.path.exists(path):
             raise FileExistsError(f'Bottle {bottle_name} already exists')
 
-        dlm = DLManager(path, base_url)
+        dlm = DLManager(path, base_url, proxies=self.proxies)
         analysis_result = dlm.run_analysis(manifest=manifest)
 
         install_size = analysis_result.install_size
