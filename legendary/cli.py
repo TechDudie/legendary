@@ -40,8 +40,8 @@ logger = logging.getLogger('cli')
 
 
 class LegendaryCLI:
-    def __init__(self, override_config=None, api_timeout=None):
-        self.core = LegendaryCore(override_config, timeout=api_timeout)
+    def __init__(self, override_config=None, api_timeout=None, proxies={}):
+        self.core = LegendaryCore(override_config, timeout=api_timeout, proxies=proxies)
         self.logger = logging.getLogger('cli')
         self.logging_queue = None
 
