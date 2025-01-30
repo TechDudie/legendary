@@ -204,6 +204,7 @@ optional arguments:
   -J, --pretty-json     Pretty-print JSON
   -A <seconds>, --api-timeout <seconds>
                         API HTTP request timeout (default: 10 seconds)
+  -p, --proxy <proxy>   Route all requests through a Socks5 proxy server
 
 Commands:
   <command>
