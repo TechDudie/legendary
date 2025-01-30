@@ -27,6 +27,7 @@ jobs:
         setuptools
         pyinstaller
         requests
+        requests[socks]
         filelock
 
     - name: Optional dependencies (WebView)
